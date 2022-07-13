@@ -1,0 +1,57 @@
+@name Private Chat
+@persist NET_ADDR:string
+@outputs Ow:entity [ Say Cmd ]:string
+
+runOnChat(1)
+runOnLast(1)
+
+if( first() )
+{
+    NET_ADDR = "ChatNet"
+    
+    dsJoinGroup(NET_ADDR)
+    dsSetScope(2)
+    
+    dsSend("connect",NET_ADDR,entity())
+}
+
+if( dsClk() )
+{
+    local CMD = dsClkName()
+    
+    if( CMD == "connect" )
+    {
+        printColor(vec(0,255,0),"[+] ",vec(255,255,0),dsGetSender():owner():name(),vec(255)," connected to the chat.")
+    }
+    
+    if( CMD == "disconnect" )
+    {
+        printColor(vec(255,0,0),"[-] ",vec(255,255,0),dsGetSender():owner():name(),vec(255)," disconnected from the chat.")
+    }
+    
+    if( CMD == "message" )
+    {
+        printColor(vec(255,0,0),"[PRIVATE] ",vec(255,255,0),dsGetSender():owner():name(),": ",vec(255),dsGetString())
+    }
+}
+
+if( last() )
+{
+    dsSend("disconnect",NET_ADDR,entity())
+}
+
+Ow = owner()
+Say = Ow:lastSaid()
+Cmd = Say[1]
+
+if( chatClk(Ow) )
+{
+    if( Cmd == ">" )
+    {
+        hideChat(1)
+        local MSG = Say:explode(">")[2,string]
+        
+        dsSend("message",NET_ADDR,MSG)
+        printColor(vec(255,0,0),"[PRIVATE] ",vec(255,255,0),owner():name(),": ",vec(255),MSG)
+    }
+}
