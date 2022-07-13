@@ -1,0 +1,35 @@
+@name Hover LIB
+@model models/props_phx/construct/metal_plate1.mdl
+
+function void entity:hoverHeight( [Height Stab YStab]:number ) {
+    R = rangerOffset(Height,This:pos(),vec(0,0,-1))
+    This:applyForce( (vec(0,0,Height-R:distance()) - This:vel()*0.1) * This:mass() )
+    
+    AngX1=This:angVel()[1]*Stab
+    AngY1=This:angVel()[2]*Stab
+    AngZ1=This:angVel()[3]*Stab
+    AngX2=This:angles()[1]*Stab
+    AngY2=This:angles()[2]*Stab
+    AngZ2=This:angles()[3]*Stab
+    This:applyAngForce(ang(-AngX1*This:mass(),-AngY1*This:mass()*YStab,-AngZ1*This:mass()))
+    This:applyAngForce(ang(0,0,0)-ang(AngX2*This:mass()*2,0,AngZ2*This:mass()*2))
+}
+
+function void entity:hoverMove( [ForwardSpeed SideSpeed]:number ) {
+    This:applyForce( (This:forward()*ForwardSpeed + This:right()*SideSpeed) * This:mass() )    
+}
+
+function number entity:hoverHeightZ( [Height Stab YStab]:number ) {
+    This:applyForce( (vec(0,0,Height-This:pos()[3]) - This:vel()*0.1) * This:mass() )
+    
+    AngX1=This:angVel()[1]*Stab
+    AngY1=This:angVel()[2]*Stab
+    AngZ1=This:angVel()[3]*Stab
+    AngX2=This:angles()[1]*Stab
+    AngY2=This:angles()[2]*Stab
+    AngZ2=This:angles()[3]*Stab
+    This:applyAngForce(ang(-AngX1*This:mass(),-AngY1*This:mass()*YStab,-AngZ1*This:mass()))
+    This:applyAngForce(ang(0,0,0)-ang(AngX2*This:mass()*2,0,AngZ2*This:mass()*2))
+    
+    return This:pos()[3]
+}

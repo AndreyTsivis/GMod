@@ -1,0 +1,19 @@
+function number wirelink:inside(Index, Player:entity) {
+    CX=This:egpCursor(Player)[1]
+    CY=This:egpCursor(Player)[2]
+    X=This:egpPos(Index)[1]
+    Y=This:egpPos(Index)[2]
+    W=This:egpSize(Index)[1]
+    H=This:egpSize(Index)[2]
+    return CX >= (X-W) & CY >= (Y-H) & CX <= (X+W) & CY <= (Y+H)
+}
+    
+function number wirelink:inside(Index, Player:entity, Size:vector2 ) {
+    CX=This:egpCursor(Player)[1]
+    CY=This:egpCursor(Player)[2]
+    X=This:egpPos(Index)[1]
+    Y=This:egpPos(Index)[2]
+    W=This:egpSize(Index)[1]-Size[1]
+    H=This:egpSize(Index)[2]-Size[2]
+    return CX >= (X-W) & CY >= (Y-H) & CX <= (X+W) & CY <= (Y+H)
+}
