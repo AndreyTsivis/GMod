@@ -1,0 +1,121 @@
+@name E2 Cameras
+@inputs [ Cam ]:wirelink
+@persist Cameras:table [ Driver Seat Ow E ]:entity
+@persist F
+@persist [ OwSay OwCmd OwArg1 OwArg2 OwArg3 ]:string OwArgs:array
+@persist [ DrvSay DrvCmd DrvArg1 DrvArg2 ]:string DrvArgs:array
+
+interval(100)
+runOnChat(1)
+
+if( first() )
+{
+    Ow = owner()
+    E = entity()
+    Seat = E:isWeldedTo()
+    
+    holoCreate(1000)
+    holoAlpha(1000,0)
+}
+
+if( changed(Seat:driver()) ) { Driver = Seat:driver() }
+if( changed(Driver:keyPressed("F")) & Driver:keyPressed("F")==1 ) { F = !F }
+if( Driver==noentity() ) { Cam["Activated",number] = 0  Cam["Position",vector] = vec(0,0,0)  F = 0 }
+if( changed(F) ) { Cam["FLIR",number] = F }
+
+# OWNER SIDE
+
+OwSay = Ow:lastSaid()
+OwArgs = OwSay:explode(" ")
+OwCmd = OwArgs[1,string]
+OwArg1 = OwArgs[2,string]
+OwArg2 = OwArgs[3,string]
+OwArg3 = OwArgs[4,string]
+
+if( chatClk(Ow) & Ow!=Driver ) {
+    if( OwCmd == "/cam" )
+    {
+        hideChat(1)
+        if( OwArg1 == "help" )
+        {
+            printColor(vec(255,255,0),"/cam help",vec(255)," - shows a list of commands.")
+            printColor(vec(255,255,0),"/cam create [name]",vec(255)," - creates a camera.")
+            printColor(vec(255,255,0),"/cam remove [name]",vec(255)," - deletes the camera.")
+            printColor(vec(255,255,0),"/cam show [name]",vec(255)," - shows the camera.")
+            printColor(vec(255,255,0),"/cam hide [name]",vec(255)," - hides the camera")
+            printColor(vec(255,255,0),"/cam rename [name] [new name]",vec(255)," - renames the camera")
+            printColor(vec(255,255,0),"/cam repos [name]",vec(255)," - moves the camera.")
+        }
+        if( OwArg1 == "create" )
+        {
+            local Cam = table()
+            Cam["Name",string] = OwArg2
+            Cam["Pos",vector] = Ow:pos()+vec(0,0,Ow:height()/1.2)
+            
+            Cameras[OwArg2,table] = Cam
+        }
+        if( OwArg1 == "remove" )
+        {
+            Cameras:remove(OwArg2)
+        }
+        if( OwArg1 == "show" )
+        {
+            holoPos(1000,Cameras[OwArg2,table]["Pos",vector])
+            holoAlpha(1000,255)
+        }
+        if( OwArg1 == "hide" )
+        {
+            holoAlpha(1000,0)
+        }
+        if( OwArg1 == "rename" )
+        {
+            local Cam = Cameras[OwArg2,table]
+            Cameras:remove(OwArg2)
+            Cam["Name",string] = OwArg3
+            Cameras[OwArg3,table] = Cam
+        }
+        if( OwArg1 == "repos" )
+        {
+            Cameras[OwArg2,table]["Pos",vector] = Ow:pos()+vec(0,0,Ow:height()/1.2)
+        }
+    }
+}
+
+# DRIVER SIDE
+
+DrvSay = Driver:lastSaid()
+DrvArgs = DrvSay:explode(" ")
+DrvCmd = DrvArgs[1,string]
+DrvArg1 = DrvArgs[2,string]
+DrvArg2 = DrvArgs[3,string]
+
+if(chatClk(Driver)) {
+    if( DrvCmd == "/cam" )
+    {
+        hideChat(1)
+        if( DrvArg1 == "help" )
+        {
+            Seat:printColorDriver(vec(255,255,0),"/cam help",vec(255)," - shows a list of commands.")
+            Seat:printColorDriver(vec(255,255,0),"/cam list",vec(255)," - shows a list of cameras.")
+            Seat:printColorDriver(vec(255,255,0),"/cam connect [name]",vec(255)," - connect to the camera.")
+            Seat:printColorDriver(vec(255,255,0),"/cam disconnect",vec(255)," - disconnect from the camera.")
+        }
+        if( DrvArg1 == "connect" )
+        {
+            Cam["Position",vector] = Cameras[DrvArg2,table]["Pos",vector]
+            Cam["Activated",number] = 1
+        }
+        if( DrvArg1 == "disconnect" )
+        {
+            Cam["Position",vector] = vec(0,0,0)
+            Cam["Activated",number] = 0
+        }
+        if( DrvArg1 == "list" )
+        {
+            for( I=1,Cameras:count() )
+            {
+                Seat:printColorDriver(vec(255),I,") ",vec(255,255,0),Cameras:keys()[I,string])
+            }
+        }
+    }
+}
