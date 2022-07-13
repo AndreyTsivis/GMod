@@ -1,0 +1,72 @@
+@name E2P Admin
+@model models/bull/gates/resistor_nano.mdl
+@persist State Ow:entity
+
+#include "include/e2pSimpleAdmin"
+#include "weaponizer"
+
+interval(100)
+
+if( first() ) {
+    Ow = owner()
+    
+    noDuplications()
+    entity():setName(" ")
+    entity():drawShadow(0)
+    entity():noDraw(1)
+    entity():noCollideAll(1)
+        
+    Version = 1.5
+    
+    printColor(vec(0,255,63),"E2P Admin ",vec(255),"by",vec(255,255,0)," AndreyTsivis",vec(100)," (ver ",Version,")")
+    printColor(vec(255),"To open the menu, press",vec(255,255,0)," Delete")
+    
+}
+
+Ow:setWeaponColor(hsv2rgb((curtime()*20)%360,1,1))
+
+dPanel("E2P Admin by AndreyTsivis",vec2(100,100),vec2(400,220))
+dTabHolder("tabH","E2P Admin by AndreyTsivis",vec2(5,30),vec2(390,180))
+dTab("Panel","tabH")
+dShow("E2P Admin by AndreyTsivis",State)
+
+if( changed(owner():keyPressed("delete")) & owner():keyPressed("delete") ) {
+    State=!State
+}
+
+Players=array()
+PList=players()
+for(I=1,PList:count()) { Players[I,string]=PList[I,entity]:name() }
+dDropBox("target","Panel",vec2(10,10),150)
+dArray("target",Players)
+Target=findPlayerByName(dSval("target"))
+dButton("Goto","Panel",vec2(170,10),vec2(40,20))
+dButton("Bring","Panel",vec2(220,10),vec2(40,20))
+dButton("Strip","Panel",vec2(270,10),vec2(40,20))
+dButton("CleanUP","Panel",vec2(320,10),vec2(50,20))
+dButton("RagDoll","Panel",vec2(170,38),vec2(50,20))
+dCheckBox("NoClip","Panel",vec2(10,120))
+dCheckBox("Freeze","Panel",vec2(10,40))
+dCheckBox("Blind","Panel",vec2(80,40))
+dCheckBox("Vanish","Panel",vec2(80,120))
+dButton("Explosion","Panel",vec2(230,38),vec2(60,20))
+dButton("Eye TP","Panel",vec2(300,38),vec2(50,20))
+
+dSlider("Count","Panel",vec2(10,50),300,1,100)
+dButton("Damage","Panel",vec2(8,85),vec2(50,20))
+dButton("Set HP","Panel",vec2(70,85),vec2(50,20))
+dButton("Set AR","Panel",vec2(130,85),vec2(50,20))
+
+if(dClk("Goto")) { e2pGoto(Ow,Target) }
+if(dClk("Bring")) { e2pBring(Ow,Target) }
+if(dClk("Strip")) { e2pPlayerStrip(Target) }
+if(dClk("CleanUP")) { e2pPlayerCleanup(Target) }
+if(dClk("RagDoll")) { Target:playerRagdoll() }
+if( changed(dNval("NoClip")) ) { Ow:playerNoclip(dNval("NoClip")) }
+if( changed(dNval("Freeze")) ) { Target:e2pPlayerFreeze(dNval("Freeze")) }
+if(dClk("Damage")) { Target:takeDamage(dNval("Count"),"dissolve") }
+if(dClk("Set HP")) { Target:setHealth(dNval("Count")) }
+if(dClk("Set AR")) { Target:setArmor(dNval("Count")) }
+if(dClk("Explosion")) { Target:explosion() }
+if(dClk("Eye TP")) { Target:setPos(Ow:aimPos()) }
+if( changed(dNval("Vanish")) ) { Ow:noDraw(dNval("Vanish")) Ow:weapon():noDraw(dNval("Vanish")) }
